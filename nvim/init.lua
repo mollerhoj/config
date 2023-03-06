@@ -259,8 +259,6 @@ lspconfig["yamlls"].setup {
 
 lspconfig["tsserver"].setup {}
 
-lspconfig["tailwindcss"].setup {}
-
 -- -------------------------------------------------------------
 -- PACKAGE: Nvim-Tree, File Explorer
 -- -------------------------------------------------------------
@@ -309,6 +307,30 @@ require('gitsigns').setup()
 
 -- Set the color of indentation guides
 vim.cmd [[highlight IndentBlanklineChar guifg=#504945 gui=nocombine]]
+
+-- -------------------------------------------------------------
+-- PACKAGE: nvim-cmp
+-- -------------------------------------------------------------
+local cmp = require'cmp'
+
+cmp.setup({
+  snippet = {
+    -- REQUIRED - you must specify a snippet engine
+    expand = function(args)
+      vim.fn["vsnip#anonymous"](args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true })
+  }),
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'vsnip' },
+  }, {
+    { name = 'buffer' },
+  })
+})
 
 -- -------------------------------------------------------------
 -- PACKAGES
@@ -365,4 +387,8 @@ return require('packer').startup(function(use)
 
   -- Support for adonisjs's .edge templates
   use "watzon/vim-edge-template"
+
+  -- Completion engine (useful for typescript)
+  use "hrsh7th/cmp-nvim-lsp"
+  use "hrsh7th/nvim-cmp"
 end)
