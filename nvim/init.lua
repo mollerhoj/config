@@ -243,7 +243,6 @@ lspconfig["efm"].setup {
   filetypes = { "eruby" },
 }
 
--- Can't get autocompletions for Kubernetes to work..
 lspconfig["yamlls"].setup {
   on_attach = on_attach,
   filetypes = { "yaml" },
@@ -257,7 +256,40 @@ lspconfig["yamlls"].setup {
   }
 }
 
-lspconfig["tsserver"].setup {}
+-- Hack to enable completion in json files, see:
+-- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#jsonls
+local jsonls_capabilities = vim.lsp.protocol.make_client_capabilities()
+jsonls_capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+lspconfig["jsonls"].setup {
+  capabilities = jsonls_capabilities,
+  on_attach = on_attach,
+  settings = {
+    json = {
+      validate = { enable = true },
+      schemas = {
+        {
+          fileMatch = { 'package.json' },
+          url = 'https://json.schemastore.org/package.json',
+        },
+        {
+          fileMatch = { 'tsconfig.json', 'tsconfig.*.json' },
+          url = 'http://json.schemastore.org/tsconfig',
+        },
+      },
+    },
+  }
+}
+
+-- This extends the lspconfig["tsserver"]
+require("typescript").setup {
+  disable_commands = false, -- prevent the plugin from creating Vim commands
+  debug = false, -- enable debug logging for commands
+  go_to_source_definition = {
+      fallback = true, -- fall back to standard LSP definition on failure
+  },
+  server = {} -- pass options to lspconfig's setup method
+}
 
 -- -------------------------------------------------------------
 -- PACKAGE: Nvim-Tree, File Explorer
@@ -391,4 +423,7 @@ return require('packer').startup(function(use)
   -- Completion engine (useful for typescript)
   use "hrsh7th/cmp-nvim-lsp"
   use "hrsh7th/nvim-cmp"
+
+  -- Typescript language server
+  use 'jose-elias-alvarez/typescript.nvim'
 end)
