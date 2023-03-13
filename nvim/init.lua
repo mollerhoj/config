@@ -308,7 +308,9 @@ require("nvim-tree").setup({
   },
   -- Increase with to show large file names
   view = {
-    width = 50
+    width = {
+      min = 30
+    }
   },
   -- Show git icons in leftmost columns, so that do not affect indentation
   renderer = {
